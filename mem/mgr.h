@@ -62,9 +62,6 @@ struct mm_sec {
 /** The active memory section */
 extern struct mm_sec* mm_acsec;
 
-/** Inits the global allocator */
-void mm_init(void);
-
 /** Allocates `n' bytes, returning a pointer to the memory */
 void* mm_alloc(uint n);
 
@@ -79,7 +76,8 @@ void* mm_free(void* mem);
 
 ///
 
-/** Advise the current section to take `mem' as the current header */
+/** Advise the current section to take `mem' as the current header. `mem'
+   should be MM-memory */
 void mm_manage(void* mem);
 
 /** Return the current advised section */

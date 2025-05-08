@@ -273,6 +273,36 @@ static void mm_header_part(struct mm_header* header, uint n) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static void mm_init(void) {
+  register const int pages_init =
+    PAGES_FOR(sizeof(struct mm_header) + sizeof(struct mm_sec));
+
+  void* mem = mm_alloc_page(pages_init);
+
+  mm_acsec = (struct mm_sec*) mem;
+  mm_acsec->m_off = 0;
+
+  struct mm_header* header = MM_BASE(mm_acsec);
+
+  mm_acsec->cap = pages_init*MM_PAGESIZE;
+
+  // we init a header containing the whole memory of this section. there should
+  // *always* be at least one header in the edge of the section, so that its
+  // payload exactly matches the section's edge:
+  //   (byte*)header + header->payload == (byte*)header->sec + header->sec->cap
+  *header = (struct mm_header) {
+    .prev = NULL,
+    .payload = (mm_acsec->cap - (sizeof(*header) + sizeof(*mm_acsec))),
+    .sec = mm_acsec,
+    .used = 0,
+  };
+
+  SET_EDGE(header);
+  mm_acsec->next = NULL;
+
+  mm_header_manage(header);
+}
+
 /** Alloc `n' bytes given we're on an edge header. Returns the allocated header
  */
 static struct mm_header* mm_alloc_edge(struct mm_header* header, uint n) {
@@ -361,7 +391,12 @@ static void* mm_alloc_mem(uint n, enum mm_alloc_strat like) {
 
   DB_FMT("MM> alloc: size = %d", n);
 
+  if (!mm_acsec) {
+    mm_init();
+  }
+
   struct mm_header* header = mm_acsec->cur;
+
   struct mm_avail_t avail = mm_header_avail(header, n, like);
 
   header = avail.header;
@@ -634,35 +669,5 @@ void mm_manage(void* mem) {
 }
 
 void* mm_managed(void) {
-  return MM_PAYLOAD_OF(mm_acsec->cur);
-}
-
-void mm_init(void) {
-  register const int pages_init =
-    PAGES_FOR(sizeof(struct mm_header) + sizeof(struct mm_sec));
-
-  void* mem = mm_alloc_page(pages_init);
-
-  mm_acsec = (struct mm_sec*) mem;
-  mm_acsec->m_off = 0;
-
-  struct mm_header* header = MM_BASE(mm_acsec);
-
-  mm_acsec->cap = pages_init*MM_PAGESIZE;
-
-  // we init a header containing the whole memory of this section. there should
-  // *always* be at least one header in the edge of the section, so that its
-  // payload exactly matches the section's edge:
-  //   (byte*)header + header->payload == (byte*)header->sec + header->sec->cap
-  *header = (struct mm_header) {
-    .prev = NULL,
-    .payload = (mm_acsec->cap - (sizeof(*header) + sizeof(*mm_acsec))),
-    .sec = mm_acsec,
-    .used = 0,
-  };
-
-  SET_EDGE(header);
-  mm_acsec->next = NULL;
-
-  mm_header_manage(header);
+  return mm_acsec? MM_PAYLOAD_OF(mm_acsec->cur): NULL;
 }
