@@ -9,7 +9,7 @@ static bool did_msg = false;
 
 static int panic_enopreverr(void) {
   return panicm(
-    ERR_MODSTR("err", "bubbling up error/panic with no previous error"), -1);
+    ERR_MODSTR("PANIC", "bubbling up error/panic with no previous error"), -1);
 }
 
 int eerr(const string_s emsg, int ecode, bool force_msg) {
