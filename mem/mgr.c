@@ -445,7 +445,7 @@ void* mm_free(void* mem) {
 
   // keep if we're still using it
   if ((--header->used)) {
-    DB_FMT("	-> free: kept with %d remaining", header->used);
+    DB_FMT("	-> free: kept with %d owners remaining", header->used);
 
     return mem;
   }
@@ -593,7 +593,7 @@ void* mm_freek(void* mem, uint off, uint n) {
 }
 
 void* mm_expand(void* mem, int n) {
-  register void* ret = NULL;
+  register void* ret = mem;
 
   if (!mem) {
     __return(ret = mm_alloc(n));
@@ -602,30 +602,35 @@ void* mm_expand(void* mem, int n) {
   struct mm_header* c_header = MM_HEADER_OF(mem);
   struct mm_header* p_header = c_header->prev? c_header->prev: c_header;
 
+  const uint c_used = c_header->used;
   const uint c_payload = c_header->payload;
   const uint payload = c_payload + n;
 
-  void* free = mm_free(mem);
+  /*void* free =*/ (void) mm_free(mem);
 
   // TODO: without `MM_VOLATILE' implementation, not using `mm_alloc' is dumb
   struct mm_avail_t avail = mm_header_avail(p_header, payload, MM_VOLATILE);
   struct mm_header* header = avail.header;
 
-  DB_FMT("	-> alloc: expanded to %p", MM_PAYLOAD_OF(header));
-
   if (!avail.on_vm) {
     header = mm_alloc_edge(header, n);
   }
 
+  // `!avail.on_vm' implies this
   if (header != c_header) {
     ret = mmove(mem, MM_PAYLOAD_OF(header), c_payload);
-
-    // clamp the output
-    mm_header_part(header, payload);
   }
 
-  mm_use(ret);
+  // clamp the output
+  mm_header_part(header, payload);
   mm_header_manage(header);
+
+  header->used = c_used;
+
+  DB_FMT("MM> alloc: size = %d", header->payload);
+  DB_FMT("	-> alloc: expand from %p", c_header);
+  DB_FMT("	-> alloc: yielding %p at %p",
+         MM_PAYLOAD_OF(header), header);
 
   __defer_for(ret);
 }

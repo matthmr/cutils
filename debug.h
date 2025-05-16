@@ -10,6 +10,9 @@
 #    include <stdio.h>
 #    include <unistd.h>
 
+#    define __debug(...) \
+     __VA_ARGS__
+
 #    define DB_MSG(msg) \
        fputs(msg "\n", stderr)
 #    define DB_BYT(byt) \
@@ -29,6 +32,8 @@ debug_mm_headers(char* msg, struct mm_header* header);
 #    endif
 
 #  else
+
+#    define __debug(...)
 
 #    define DB_MSG(x)
 #    define DB_BYT(x)

@@ -137,5 +137,5 @@ debug_mm_headers(char* msg, struct mm_header* header) {
 #endif
 
 struct mm_header* mm_header_of(void* mem) {
-  return ((struct mm_header*) mem - 1);
+  return (((struct mm_header*) mem) - 1);
 }
