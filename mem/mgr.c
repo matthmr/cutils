@@ -96,7 +96,7 @@ struct mm_header* next, uint n);
 
 /** Allocates `m_pages' whole pages, returning a pointer to it */
 static void* mm_alloc_page(uint pages) {
-  DB_FMT("	-> alloc: allocating %d new page(s)", pages);
+  __debug_fmt("	-> alloc: allocating %d new page(s)", pages);
 
   void* ret_t = NULL;
 
@@ -314,7 +314,7 @@ static struct mm_header* mm_alloc_edge(struct mm_header* header, uint n) {
   // it could be the case that some other program used `brk' to allocate some
   // memory: we have to handle it
   if (c_brk != mm_upper) {
-    DB_MSG("	-> alloc: allocation clash!");
+    __debug_msg("	-> alloc: allocation clash!");
     t_size += sizeof(*mm_acsec);
   }
 
@@ -389,7 +389,7 @@ static struct mm_header* mm_alloc_edge(struct mm_header* header, uint n) {
 static void* mm_alloc_mem(uint n, enum mm_alloc_strat like) {
   register void* ret = NULL;
 
-  DB_FMT("MM> alloc: size = %d", n);
+  __debug_fmt("MM> alloc: size = %d", n);
 
   if (!mm_acsec) {
     mm_init();
@@ -402,11 +402,11 @@ static void* mm_alloc_mem(uint n, enum mm_alloc_strat like) {
   header = avail.header;
 
   if (avail.on_vm) {
-    DB_MSG("	-> alloc: virtual allocation");
+    __debug_msg("	-> alloc: virtual allocation");
     mm_header_part(header, n);
   }
   else {
-    DB_MSG("	-> alloc: edge allocation");
+    __debug_msg("	-> alloc: edge allocation");
     header = mm_alloc_edge(header, n);
   }
 
@@ -416,9 +416,8 @@ static void* mm_alloc_mem(uint n, enum mm_alloc_strat like) {
 
   ret = MM_PAYLOAD_OF(header);
 
-  DB_FMT("	-> alloc: yielding %p at %p", ret, header);
-
-  debug_mm_headers("MM> post-alloc headers", header);
+  __debug_fmt("	-> alloc: yielding %p at %p", ret, header);
+  __debug_mm_headers("MM> post-alloc headers", header);
 
   return ret;
 }
@@ -437,7 +436,7 @@ void* mm_free(void* mem) {
 
   struct mm_header* header = MM_HEADER_OF(mem);
 
-  DB_FMT("MM> free %p at %p (%d)", mem, header, header->payload);
+  __debug_fmt("MM> free %p at %p (%d)", mem, header, header->payload);
 
   if (!header->used) {
     panic(EDOUBLEFREE);
@@ -445,7 +444,7 @@ void* mm_free(void* mem) {
 
   // keep if we're still using it
   if ((--header->used)) {
-    DB_FMT("	-> free: kept with %d owners remaining", header->used);
+    __debug_fmt("	-> free: kept with %d owners remaining", header->used);
 
     return mem;
   }
@@ -470,7 +469,7 @@ void* mm_free(void* mem) {
 
   if (p_header) {
     if (!p_header->used) {
-      DB_MSG("	-> free: prev virtual");
+      __debug_msg("	-> free: prev virtual");
 
       if (!EDGEP(p_header)) {
         p_header->payload += MM_TSIZE_OF(header) | EDGEP(header);
@@ -480,7 +479,7 @@ void* mm_free(void* mem) {
     }
 
     else {
-      DB_MSG("	-> free: prev alloc");
+      __debug_msg("	-> free: prev alloc");
     }
   }
 
@@ -492,7 +491,7 @@ void* mm_free(void* mem) {
     n_header->prev = header;
 
     if (!n_header->used) {
-      DB_MSG("	-> free: next virtual");
+      __debug_msg("	-> free: next virtual");
 
       if (!EDGEP(header)) {
         header->payload += MM_TSIZE_OF(n_header) | EDGEP(n_header);
@@ -505,13 +504,13 @@ void* mm_free(void* mem) {
     }
 
     else {
-      DB_MSG("	-> free: next alloc");
+      __debug_msg("	-> free: next alloc");
     }
   }
 
   mm_header_manage(header);
 
-  debug_mm_headers("MM> post-free headers", header);
+  __debug_mm_headers("MM> post-free headers", header);
   return mem;
 }
 
@@ -583,8 +582,8 @@ void* mm_freek(void* mem, uint off, uint n) {
   // virtualize the trailing memory
   mm_header_part(m_header, n);
 
-  DB_FMT("MM> freek: alloc: size = %d", n);
-  DB_FMT("	-> freek: kept %p at %p", MM_PAYLOAD_OF(m_header), m_header);
+  __debug_fmt("MM> freek: alloc: size = %d", n);
+  __debug_fmt("	-> freek: kept %p at %p", MM_PAYLOAD_OF(m_header), m_header);
 
   mm_use(mem);
   mm_header_manage(m_header);
@@ -627,10 +626,10 @@ void* mm_expand(void* mem, int n) {
 
   header->used = c_used;
 
-  DB_FMT("MM> alloc: size = %d", header->payload);
-  DB_FMT("	-> alloc: expand from %p", c_header);
-  DB_FMT("	-> alloc: yielding %p at %p",
-         MM_PAYLOAD_OF(header), header);
+  __debug_fmt("MM> alloc: size = %d", header->payload);
+  __debug_fmt("	-> alloc: expand from %p", c_header);
+  __debug_fmt("	-> alloc: yielding %p at %p",
+              MM_PAYLOAD_OF(header), header);
 
   __defer_for(ret);
 }

@@ -21,13 +21,13 @@ int eerr(const string_s emsg, int ecode, bool force_msg) {
     did_msg = true;
     tecode = ecode;
 
-    DB_FMT("ERR> error (%d), with message:", ecode);
+    __debug_fmt("ERR> error (%d), with message:", ecode);
     write(STDERR_FILENO, emsg._, emsg.sz);
 
     return ecode;
   }
 
-  DB_FMT("	-> err: bubbling up from error (%d)", tecode);
+  __debug_fmt("	-> err: bubbling up from error (%d)", tecode);
   return ERR_BUBBLE_UP;
 }
 
