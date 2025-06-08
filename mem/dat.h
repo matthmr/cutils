@@ -25,6 +25,7 @@
 // single out the top bit of `x' integer type
 #  define TOP_BIT(x) ((x) & (1 << (sizeof(x)*8 - 1)))
 
+typedef unsigned char* mem;
 typedef unsigned char bool, byte, uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
@@ -55,6 +56,8 @@ ulong hbit(ulong payload, uint it);
 
 //// GENERIC DATA UTILS
 
+#  define SIZEOF(x) (sizeof((x))/sizeof(*(x)))
+
 /** Generic sized data, alloc-safe. Similar to `string*' */
 struct dat_sz {
   uint sz;
@@ -83,8 +86,14 @@ typedef struct dat_t dat_t;
 /** `struct dat_szt' type */
 typedef struct dat_szt dat_szt;
 
+// `NULL' value for `dat_*'
+#  define DAT_NULL {0}
+
 // convert raw data `x' into generic `dat_szt' given type  `t'
 #  define DATSZT(x, t) (dat_szt) {._ = x, .sz = 0, .typ = (t)}
+
+// convert `dat_szt' into genric `dat_sz'
+#  define DATSZT_SZ(x) (dat_sz) {._ = (x)._, .sz = (x).sz}
 
 // convert `dat_sz' `x' into generic `dat_szt' given type  `t'
 #  define DATSZT_ST(x, t) (dat_szt) {._ = (x)._, .sz = (x).sz, .typ = (t)}
@@ -133,6 +142,9 @@ typedef struct dat_llsz dat_llsz;
 
 /** `struct dat_llszt' type */
 typedef struct dat_llszt dat_llszt;
+
+// pass list `lst' (as a pointer) as "%self, %size"
+#  define LSTSZ(lst) (lst), SIZEOF(lst)
 
 //// STRING UTILS
 

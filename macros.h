@@ -3,9 +3,6 @@
 #ifndef LOCK_MACROS
 #  define LOCK_MACROS
 
-#  define SIZEOF(x) \
-  (sizeof((x))/sizeof(*(x)))
-
 #  define BITSIZEOF(x) sizeof(x)*8
 
 #  define LINE(x) \
@@ -23,6 +20,7 @@
   __assert((x) == 0, ERR());
 
 #  define ITOA(x) ((x) + 0x30)
+#  define ATOI(x) ((x) - 0x30)
 
 ////
 /** ERROR CONTROL MACROS
