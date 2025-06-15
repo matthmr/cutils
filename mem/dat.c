@@ -66,6 +66,36 @@ ulong hbit(ulong payload, uint it) {
   return (payload >> 1) ^ payload;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+/** Iterate `mcmp' with `n' less than a register */
+static inline bool mcmpbyt(mem* mem_a, mem* mem_b, uint n) {
+  for (uint i = 0; i < n; i++, mem_a++, mem_b++) {
+    if (mem_a[0] != mem_b[0]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool mcmp(void* mem_a, void* mem_b, uint n) {
+  reg* rmem_a = mem_a;
+  reg* rmem_b = mem_b;
+
+  for (; n; n -= sizeof(reg), rmem_a++, rmem_b++) {
+    if (n < sizeof(reg)) {
+      return mcmpbyt((mem*)rmem_a, (mem*)rmem_b, n);
+    }
+
+    if (rmem_a[0] != rmem_b[0]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 /** Internal function for `mmove': move with given bucket size and direction,
     returning the memory at `dest' */
 static void*

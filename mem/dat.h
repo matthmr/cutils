@@ -29,7 +29,7 @@ typedef unsigned char* mem;
 typedef unsigned char bool, byte, uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
-typedef unsigned long ulong;
+typedef unsigned long ulong, reg;
 
 //// BIT-FIELD UTILS
 
@@ -43,10 +43,6 @@ void bf_set(char* bf, uint at);
 /** Set boolean bit value of bit at position `at' given bit-field `bf' to false
    */
 void bf_unset(char* bf, uint at);
-
-/** Move memory from `src' to `dst', given their respective sizes (`src_n'),
-    taking care of overlapping, returning the memory at `dst' */
-void* mmove(void* src, void* dst, uint src_n);
 
 /** Return the highest-set bit from `payload', iterating at most `it' times */
 ulong hbit(ulong payload, uint it);
@@ -105,7 +101,17 @@ typedef struct dat_szt dat_szt;
 // being of `*_sz*' types)
 #  define mcpy(src,mem) (void) mmove((src), (mem), (sizeof(*(mem))))
 
-//// LIST UTILS
+///
+
+/** Move memory from `src' to `dst', given their respective sizes (`src_n'),
+    taking care of overlapping, returning the memory at `dst' */
+void* mmove(void* src, void* dst, uint src_n);
+
+/** Compare `n' bytes from `mem_a' and `mem_b', returning whether they all have
+    the same value */
+bool mcmp(void* mem_a, void* mem_b, uint n);
+
+//// LINKED LIST UTILS
 
 /** Generic linked list, alloc safe */
 struct dat_ll {
@@ -144,7 +150,7 @@ typedef struct dat_llsz dat_llsz;
 typedef struct dat_llszt dat_llszt;
 
 // pass list `lst' (as a pointer) as "%self, %size"
-#  define LSTSZ(lst) (lst), SIZEOF(lst)
+#  define LST_ARG(lst) (lst), SIZEOF(lst)
 
 //// STRING UTILS
 
