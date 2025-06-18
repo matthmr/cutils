@@ -7,7 +7,7 @@
 
 #  ifdef DEBUG
 
-#    include <utils/mem/mgr.h>
+#    include "mem/mgr.h"
 
 #    include <stdio.h>
 #    include <unistd.h>

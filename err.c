@@ -1,5 +1,5 @@
-#include <utils/debug.h>
-#include <utils/err.h>
+#include "debug.h"
+#include "err.h"
 
 #include <stdlib.h>
 #include <unistd.h>

@@ -3,8 +3,8 @@
 #ifndef LOCK_ERR
 #  define LOCK_ERR
 
-#  include <utils/mem/dat.h>
-#  include <utils/macros.h>
+#  include "mem/dat.h"
+#  include "macros.h"
 
 #  define STRING_S_NULL STRING_S("")
 

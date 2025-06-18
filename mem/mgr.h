@@ -3,7 +3,7 @@
 #ifndef LOCK_MM
 #  define LOCK_MM
 
-#  include <utils/mem/dat.h>
+#  include "mem/dat.h"
 
 #  define mm_alloc_from(x) mm_alloc(sizeof(*(x)))
 #  define mm_allocz_from(x) mm_allocz(sizeof(*(x)))

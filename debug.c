@@ -1,5 +1,5 @@
-#include <utils/macros.h>
-#include <utils/debug.h>
+#include "macros.h"
+#include "debug.h"
 
 #ifdef DEBUG_MM
 
